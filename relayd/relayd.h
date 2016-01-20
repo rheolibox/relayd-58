@@ -215,6 +215,9 @@ struct ctl_relay_event {
 	u_int8_t		*buf;
 	int			 buflen;
 
+	int			proxy_line;
+	char			proxy_line_info[HOST_NAME_MAX+1];
+
 	/* protocol-specific descriptor */
 	void			*desc;
 };

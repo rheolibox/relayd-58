@@ -181,6 +181,14 @@ relay_read_http(struct bufferevent *bev, void *arg)
 	}
 
 	while (!cre->done && (line = evbuffer_readline(src)) != NULL) {
+		if (cre->proxy_line == 0) {
+			if (strstr(line, "PROXY ") != NULL) {
+				printf("Proxy Line %s\n", line);
+	    			sprintf(cre->proxy_line_info, "%s",line);
+				cre->proxy_line = 1;
+				continue;
+			}
+		}
 		linelen = strlen(line);
 
 		/*
@@ -1036,6 +1044,15 @@ relay_expand_http(struct ctl_relay_event *cre, char *val, char *buf,
 			if (expand_string(buf, len,
 			    "$REMOTE_ADDR", ibuf) != 0)
 				return (NULL);
+		}
+		if (strstr(val, "$REMOTE_PROXY") != NULL) {
+			printf("(1)\n");
+			snprintf(ibuf, sizeof(ibuf), "%s", cre->proxy_line_info);
+			printf("(2)\n");
+			if (expand_string(buf, len,
+			    "$REMOTE_PROXY", ibuf) != 0)
+				return (NULL);
+			printf("PROXY bug %s\n", buf);
 		}
 		if (strstr(val, "$REMOTE_PORT") != NULL) {
 			snprintf(ibuf, sizeof(ibuf), "%u", ntohs(cre->port));
